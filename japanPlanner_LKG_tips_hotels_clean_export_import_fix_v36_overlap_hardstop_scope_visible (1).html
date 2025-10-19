@@ -621,21 +621,21 @@ table tbody tr:hover .row-actions{ display:flex; }
         </div>
         
         <div class="tabs">
-            <button class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
-            <button class="tab" onclick="showTab('overview')">📅 Overview</button>
-            <button class="tab" onclick="showTab('tokyo')">🗼 Tokyo</button>
-            <button class="tab" onclick="showTab('hakone')">🏔️ Hakone</button>
-            <button class="tab" onclick="showTab('magome')">🥾 Magome</button>
-            <button class="tab" onclick="showTab('tsumago')">🏘️ Tsumago</button>
-            <button class="tab" onclick="showTab('kyoto')">⛩️ Kyoto</button>
-            <button class="tab" onclick="showTab('matsusaka')">🥩 Matsusaka</button>
-            <button class="tab" onclick="showTab('osaka')">🍜 Osaka</button>
-            <button class="tab" onclick="showTab('hiroshima')">🕊️ Hiroshima</button>
-            <button class="tab" onclick="showTab('hotels')">🏨 Hotels</button>
-            <button class="tab" onclick="showTab('travel')">✈️ Travel</button>
-            <button class="tab" onclick="showTab('tips')">💡 Tips</button>
-            <button class="tab" onclick="showTab('phrases')">🗣️ Phrases</button>
-            <button class="tab" onclick="showTab('glossary')">📖 Glossary</button>
+            <button class="tab active" data-tab="dashboard" onclick="showTab('dashboard', this)">📊 Dashboard</button>
+            <button class="tab" data-tab="overview" onclick="showTab('overview', this)">📅 Overview</button>
+            <button class="tab" data-tab="tokyo" onclick="showTab('tokyo', this)">🗼 Tokyo</button>
+            <button class="tab" data-tab="hakone" onclick="showTab('hakone', this)">🏔️ Hakone</button>
+            <button class="tab" data-tab="magome" onclick="showTab('magome', this)">🥾 Magome</button>
+            <button class="tab" data-tab="tsumago" onclick="showTab('tsumago', this)">🏘️ Tsumago</button>
+            <button class="tab" data-tab="kyoto" onclick="showTab('kyoto', this)">⛩️ Kyoto</button>
+            <button class="tab" data-tab="matsusaka" onclick="showTab('matsusaka', this)">🥩 Matsusaka</button>
+            <button class="tab" data-tab="osaka" onclick="showTab('osaka', this)">🍜 Osaka</button>
+            <button class="tab" data-tab="hiroshima" onclick="showTab('hiroshima', this)">🕊️ Hiroshima</button>
+            <button class="tab" data-tab="hotels" onclick="showTab('hotels', this)">🏨 Hotels</button>
+            <button class="tab" data-tab="travel" onclick="showTab('travel', this)">✈️ Travel</button>
+            <button class="tab" data-tab="tips" onclick="showTab('tips', this)">💡 Tips</button>
+            <button class="tab" data-tab="phrases" onclick="showTab('phrases', this)">🗣️ Phrases</button>
+            <button class="tab" data-tab="glossary" onclick="showTab('glossary', this)">📖 Glossary</button>
         </div>
         
         <div id="dashboard" class="tab-content active">
@@ -1195,36 +1195,71 @@ if (typeof window !== 'undefined') { window.parseLine = parseLine; }
             return: { airline: '', flightNumber: '', from: '', to: '', date: '', time: '', confirmation: '' }
         };
 
-        function showTab(tabName) {
+        function showTab(tabName, source) {
             const tabs = document.querySelectorAll('.tab');
             const contents = document.querySelectorAll('.tab-content');
-            
+
             tabs.forEach(t => t.classList.remove('active'));
             contents.forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-            
+
+            let tabButton = null;
+            if (source) {
+                if (source instanceof Event) {
+                    tabButton = source.currentTarget || source.target;
+                } else {
+                    tabButton = source;
+                }
+            }
+            if (tabButton && !tabButton.classList.contains('tab')) {
+                tabButton = tabButton.closest('.tab');
+            }
+            if (!tabButton) {
+                tabButton = document.querySelector(`.tab[data-tab="${tabName}"]`);
+            }
+            if (tabButton) {
+                tabButton.classList.add('active');
+            }
+
+            const tabContent = document.getElementById(tabName);
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
+
             const dynamicTabs = ['tokyo', 'hakone', 'magome', 'tsumago', 'kyoto', 'matsusaka', 'osaka', 'hiroshima'];
-            
+
             if (dynamicTabs.includes(tabName)) {
-                if (document.getElementById(tabName).children.length === 0) {
+                if (tabContent && tabContent.children.length === 0) {
                     createLocationTable(tabName);
                 }
             } else if (tabName === 'overview') {
                 createTripOverview();
-            } else if (tabName === 'hotels' && document.getElementById('hotels').children.length === 0) {
-                createHotelTables();
-            } else if (tabName === 'tips' && document.getElementById('tips').children.length === 0) {
-                createTipsSection();
-            } else if (tabName === 'travel' && document.getElementById('travel').children.length === 0) {
-                createTravelTab();
-            } else if (tabName === 'phrases' && document.getElementById('phrases').children.length === 0) {
-                createPhrasesTab();
-            } else if (tabName === 'glossary' && document.getElementById('glossary').children.length === 0) {
-                createGlossaryTab();
+            } else if (tabName === 'hotels') {
+                const hotelsTab = document.getElementById('hotels');
+                if (hotelsTab && hotelsTab.children.length === 0) {
+                    createHotelTables();
+                }
+            } else if (tabName === 'tips') {
+                const tipsTab = document.getElementById('tips');
+                if (tipsTab && tipsTab.children.length === 0) {
+                    createTipsSection();
+                }
+            } else if (tabName === 'travel') {
+                const travelTab = document.getElementById('travel');
+                if (travelTab && travelTab.children.length === 0) {
+                    createTravelTab();
+                }
+            } else if (tabName === 'phrases') {
+                const phrasesTab = document.getElementById('phrases');
+                if (phrasesTab && phrasesTab.children.length === 0) {
+                    createPhrasesTab();
+                }
+            } else if (tabName === 'glossary') {
+                const glossaryTab = document.getElementById('glossary');
+                if (glossaryTab && glossaryTab.children.length === 0) {
+                    createGlossaryTab();
+                }
             }
-            
+
             if (tabName === 'dashboard') {
                 updateDashboard();
             }
